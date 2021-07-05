@@ -16,3 +16,5 @@ interpretability/pokerdvs/
 interpretability/nmnist/
 
 MGP-VAE/
+
+.ipynb_checkpoints/
