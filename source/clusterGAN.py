@@ -97,12 +97,6 @@ class clusterGAN(object):
         'Training {} on {}, sampler = {}, z = {} dimension, beta_n = {}, beta_c = {}'.
             format(self.model, self.data, self.sampler, self.z_dim, self.beta_cycle_gen, self.beta_cycle_label))
 
-
-        im_save_dir = 'logs/{}/{}/{}_z{}_cyc{}_gen{}'.format(self.data, self.model, self.sampler, self.z_dim,
-                                                                 self.beta_cycle_label, self.beta_cycle_gen)
-        if not os.path.exists(im_save_dir):
-            os.makedirs(im_save_dir)
-
         for t in range(0, num_batches):
             d_iters = 5
 
@@ -254,9 +248,3 @@ class clusterGAN(object):
               .format(self.data, self.model, self.sampler, self.z_dim, self.beta_cycle_label, self.beta_cycle_gen))
         print(' #Points = {}, K = {}, Purity = {},  NMI = {}, ARI = {},  '
               .format(latent_rep.shape[0], self.num_classes, purity, nmi, ari))
-
-        with open('logs/Res_{}_{}.txt'.format(self.data, self.model), 'a+') as f:
-                f.write('{}, {} : K = {}, z_dim = {}, beta_label = {}, beta_gen = {}, sampler = {}, Purity = {}, NMI = {}, ARI = {}\n'
-                        .format(timestamp, data_split, self.num_classes, self.z_dim, self.beta_cycle_label, self.beta_cycle_gen,
-                                self.sampler, purity, nmi, ari))
-                f.flush()
