@@ -82,7 +82,7 @@ class clusterGAN(object):
         
         print('Training on {}, z = {} dimension, beta_n = {}, beta_c = {}'.format(self.dataset, self.z_dim, self.beta_cycle_gen, self.beta_cycle_label))
 
-        im_save_dir = 'logs/{}/z{}_cyc{}_gen{}'.format(self.dataset, self.z_dim,self.beta_cycle_label, self.beta_cycle_gen)
+        im_save_dir = 'clusterGAN/{}/z{}_cyc{}_gen{}'.format(self.dataset, self.z_dim,self.beta_cycle_label, self.beta_cycle_gen)
         if not os.path.exists(im_save_dir):
             os.makedirs(im_save_dir)
         
@@ -169,7 +169,7 @@ class clusterGAN(object):
         print('Data = {}, z_dim = {}, beta_label = {}, beta_gen = {} '.format(self.dataset, self.z_dim, self.beta_cycle_label, self.beta_cycle_gen))
         print(' #Points = {}, K = {}, Purity = {},  NMI = {}, ARI = {},  '.format(latent_rep.shape[0], self.num_classes, purity, nmi, ari))
 
-        with open('logs/Res_{}.txt'.format(self.dataset), 'a+') as f:
+        with open('clusterGAN/Res_{}.txt'.format(self.dataset), 'a+') as f:
             f.write('{}, {} : K = {}, z_dim = {}, beta_label = {}, beta_gen = {}, Purity = {}, NMI = {}, ARI = {}\n'.format(timestamp, 'Test', self.num_classes, self.z_dim, self.beta_cycle_label, self.beta_cycle_gen, purity, nmi, ari))
             f.flush()
 
