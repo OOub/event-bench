@@ -4,7 +4,6 @@ import tonic.transforms as transforms
 from torch.utils.data import DataLoader
 import sklearn.utils as sku
 from ..utilities import subset, custom_sampler
-import matplotlib.pyplot as plt
 
 class DataSampler(object):
     def __init__(self, frame_time, subsample):
@@ -43,17 +42,8 @@ def parse(dataloader, shuffle=True):
     X = []
     Y = []
     for i, (frame, label) in enumerate(dataloader):
-        print("original", frame.shape)
-        plt.imshow(frame[0][0])
-        plt.show()
         frame = crop(frame, target_size=(112, 112))
-        print("crop", frame.shape)
-        plt.imshow(frame[0][0])
-        plt.show()
         frame = downsample(frame, factor=4)
-        print("downsample", frame.shape)
-        plt.imshow(frame[0][0])
-        plt.show()
         n_seq = frame.shape[1]
         X.extend(np.reshape(frame, (n_seq, 784)))
         Y.extend([label.item()] * n_seq)
@@ -72,7 +62,7 @@ def downsample(image, factor, estimator=np.nanmean):
     w = image.shape[2]
     h = image.shape[3]
     
-    downsampled = np.empty((1, image.shape[1], w / factor, h / factor))
+    downsampled = np.empty((1, image.shape[1], int((w-(w % factor))/factor), int((h-(h % factor))/factor)))
     for i in np.arange(image.shape[1]):
         cropped = image[0][i][:w-(w % int(factor)),:h-(h % int(factor))]
         downsampled[0][i] = estimator(np.concatenate([[cropped[j::factor,k::factor] for j in range(factor)] for k in range(factor)]), axis=0)
