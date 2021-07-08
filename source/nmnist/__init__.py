@@ -5,18 +5,14 @@ from torch.utils.data import DataLoader
 import sklearn.utils as sku
 from ..utilities import subset, custom_sampler
 
-transform = transforms.Compose([transforms.ToRatecodedFrame(frame_time=5000, merge_polarities=True)])
-train_set = tonic.datasets.NMNIST(save_to='./data', train=True, download=True, transform=transform)
-test_set = tonic.datasets.NMNIST(save_to='./data', train=False, download=True, transform=transform)
-
 class DataSampler(object):
     def __init__(self, frame_time, subsample):
         self.num_classes = 10
         
         # load data
-        transform = transforms.Compose([transforms.ToRatecodedFrame(frame_time=5000, merge_polarities=True)])
-        train_set = tonic.datasets.POKERDVS(save_to='./data', train=True, download=True, transform=transform)
-        test_set = tonic.datasets.POKERDVS(save_to='./data', train=False, download=True, transform=transform)
+        transform = transforms.Compose([transforms.ToRatecodedFrame(frame_time=frame_time, merge_polarities=True)])
+        train_set = tonic.datasets.NMNIST(save_to='./data', train=True, download=True, transform=transform)
+        test_set = tonic.datasets.NMNIST(save_to='./data', train=False, download=True, transform=transform)
 
         # get subsets if applicable
         train_index = subset(train_set, subsample)

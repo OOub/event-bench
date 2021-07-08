@@ -5,16 +5,12 @@ from torch.utils.data import DataLoader
 import sklearn.utils as sku
 from ..utilities import subset, custom_sampler
 
-transform = transforms.Compose([transforms.ToRatecodedFrame(frame_time=5000, merge_polarities=True)])
-train_set = tonic.datasets.POKERDVS(save_to='./data', train=True, download=True, transform=transform)
-test_set = tonic.datasets.POKERDVS(save_to='./data', train=False, download=True, transform=transform)
-
 class DataSampler(object):
     def __init__(self, frame_time, subsample):
         self.num_classes = 4
         
         # load data
-        transform = transforms.Compose([transforms.ToRatecodedFrame(frame_time=5000, merge_polarities=True)])
+        transform = transforms.Compose([transforms.ToRatecodedFrame(frame_time=frame_time, merge_polarities=True)])
         train_set = tonic.datasets.POKERDVS(save_to='./data', train=True, download=True, transform=transform)
         test_set = tonic.datasets.POKERDVS(save_to='./data', train=False, download=True, transform=transform)
         
