@@ -2,10 +2,8 @@ import tensorflow as tf
 import tensorflow.contrib as tc
 import tensorflow.contrib.layers as tcl
 
-
 def leaky_relu(x, alpha=0.2):
     return tf.maximum(tf.minimum(0.0, alpha * x), x)
-
 
 class Discriminator(object):
     def __init__(self, x_dim = 784):
@@ -96,9 +94,9 @@ class Generator(object):
 
 
 class Encoder(object):
-    def __init__(self, z_dim = 10, dim_gen = 10, x_dim = 784):
+    def __init__(self, z_dim = 10, latent_dim = 10, x_dim = 784):
         self.z_dim = z_dim
-        self.dim_gen = dim_gen
+        self.latent_dim = latent_dim
         self.x_dim = x_dim
         self.name = 'pokerdvs/clus_wgan/enc_net'
 
@@ -132,9 +130,9 @@ class Encoder(object):
             )
             fc1 = leaky_relu(fc1)
             fc2 = tc.layers.fully_connected(fc1, self.z_dim, activation_fn=tf.identity)
-            logits = fc2[:, self.dim_gen:]
+            logits = fc2[:, self.latent_dim:]
             y = tf.nn.softmax(logits)
-            return fc2[:, 0:self.dim_gen], y, logits
+            return fc2[:, 0:self.latent_dim], y, logits
 
 
     @property

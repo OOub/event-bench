@@ -1,52 +1,58 @@
 import tonic
-import tonic.transforms as transforms
 import numpy as np
-from sklearn.decomposition import PCA
-from sklearn.cluster import KMeans
+import tonic.transforms as transforms
 from torch.utils.data import DataLoader
+import sklearn.utils as sku
+from ..utilities import subset, custom_sampler
 
-# initialising pokerdvs
-transform = transforms.Compose([
-    transforms.ToRatecodedFrame(frame_time=5000, merge_polarities=True)
-])
-
+transform = transforms.Compose([transforms.ToRatecodedFrame(frame_time=5000, merge_polarities=True)])
 train_set = tonic.datasets.POKERDVS(save_to='./data', train=True, download=True, transform=transform)
 test_set = tonic.datasets.POKERDVS(save_to='./data', train=False, download=True, transform=transform)
 
-trainloader = DataLoader(train_set, shuffle=True, num_workers=2)
-testloader = DataLoader(test_set, shuffle=True, num_workers=2)
-
-iterator = iter(trainloader)
-        
 class DataSampler(object):
-    def __init__(self):
-        self.shape = [28, 28, 1]
+    def __init__(self, frame_time, subsample):
+        # load data
+        transform = transforms.Compose([transforms.ToRatecodedFrame(frame_time=5000, merge_polarities=True)])
+        train_set = tonic.datasets.POKERDVS(save_to='./data', train=True, download=True, transform=transform)
+        test_set = tonic.datasets.POKERDVS(save_to='./data', train=False, download=True, transform=transform)
         
-    def train(self, batch_size=1, label=False):
-        frames, labels = next(iterator)
-        frames = crop(frames, target_size=(28, 28))
-        n_seq = frames.shape[1]
-        frames = np.reshape(frames, (n_seq, 784))
-        labels = np.array([labels.item()] * n_seq)
+        # get subsets if applicable
+        train_index = subset(train_set, subsample)
+        test_index = subset(test_set, subsample)
+        trainloader = DataLoader(train_set, sampler=custom_sampler(train_index), shuffle=False)
+        testloader = DataLoader(test_set, sampler=custom_sampler(test_index), shuffle=False)
+        
+        # parse into one numpy array
+        self.X_train, self.Y_train = parse(trainloader, shuffle=True)
+        self.X_test, self.Y_test = parse(trainloader, shuffle=True)
+        
+        # dataset sizes
+        self.train_size = self.X_train.shape[0]
+        self.test_size = self.X_test.shape[0]
+            
+    def train(self, batch_size, label=False):
+        indices = np.random.randint(low=0, high=self.train_size, size=batch_size)
         if label:
-            return frames, labels
+            return self.X_train[indices, :], self.Y_train[indices]
         else:
-            return frames
-    
+            return self.X_train[indices, :]
+        
     def test(self):
-        X_test = []
-        Y_test = []
-        for i, (frame, label) in enumerate(testloader):
-            frame = crop(frame, target_size=(28, 28))
-            n_seq = frame.shape[1]
-            X_test.extend(np.reshape(frame, (n_seq, 784)))
-            Y_test.extend([label.item()] * n_seq)
-        X_test = np.vstack(X_test)
-        Y_test = np.array(Y_test)
-        return X_test, Y_test
+        return self.X_test, self.Y_test
     
-    def data2img(self, data):
-        return np.reshape(data, [data.shape[0]] + self.shape)
+def parse(dataloader, shuffle=True):
+    X = []
+    Y = []
+    for i, (frame, label) in enumerate(dataloader):
+        frame = crop(frame, target_size=(28, 28))
+        n_seq = frame.shape[1]
+        X.extend(np.reshape(frame, (n_seq, 784)))
+        Y.extend([label.item()] * n_seq)
+
+    if shuffle:
+        return sku.shuffle(np.vstack(X), np.array(Y))
+    else:
+        return np.vstack(X), np.array(Y)
     
 def crop(image, target_size=(28,28)):
     assert(len(image.shape) == 4)
