@@ -11,6 +11,8 @@ test_set = tonic.datasets.NMNIST(save_to='./data', train=False, download=True, t
 
 class DataSampler(object):
     def __init__(self, frame_time, subsample):
+        self.num_classes = 10
+        
         # load data
         transform = transforms.Compose([transforms.ToRatecodedFrame(frame_time=5000, merge_polarities=True)])
         train_set = tonic.datasets.POKERDVS(save_to='./data', train=True, download=True, transform=transform)
