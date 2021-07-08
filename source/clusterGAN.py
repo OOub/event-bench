@@ -1,3 +1,4 @@
+import os
 import time
 import numpy as np
 import tensorflow as tf
@@ -79,9 +80,9 @@ class clusterGAN(object):
         self.sess.run(tf.compat.v1.global_variables_initializer())
         start_time = time.time()
         
-        print('Training {} on {}, z = {} dimension, beta_n = {}, beta_c = {}'.format(self.model, self.data, self.z_dim, self.beta_cycle_gen, self.beta_cycle_label))
+        print('Training on {}, z = {} dimension, beta_n = {}, beta_c = {}'.format(self.dataset, self.z_dim, self.beta_cycle_gen, self.beta_cycle_label))
 
-        im_save_dir = 'logs/{}/z{}_cyc{}_gen{}'.format(self.data, self.z_dim,self.beta_cycle_label, self.beta_cycle_gen)
+        im_save_dir = 'logs/{}/z{}_cyc{}_gen{}'.format(self.dataset, self.z_dim,self.beta_cycle_label, self.beta_cycle_gen)
         if not os.path.exists(im_save_dir):
             os.makedirs(im_save_dir)
         
@@ -97,15 +98,15 @@ class clusterGAN(object):
             self.sess.run(self.g_adam, feed_dict={self.z: z_batch})
             
             if (t+1) % 100 == 0:
-                x_batch = self.x_sampler.train(batch_size)
-                z_batch = self.z_sampler(batch_size, self.z_dim, self.num_classes)
+                x_batch = self.data_sampler.train(self.batch_size)
+                z_batch = z_sampler(self.batch_size, self.z_dim, self.num_classes)
 
                 d_loss = self.sess.run(self.d_loss, feed_dict={self.x: x_batch, self.z: z_batch})
                 g_loss = self.sess.run(self.g_loss, feed_dict={self.z: z_batch})
                 print('Iter [%8d] Time [%5.4f] d_loss [%.4f] g_loss [%.4f]' % (t+1, time.time() - start_time, d_loss, g_loss))
 
             if (t+1) % 5000 == 0:
-                z_batch = z_sampler(batch_size, self.z_dim, self.num_classes)
+                z_batch = z_sampler(self.batch_size, self.z_dim, self.num_classes)
                 x_batch = self.sess.run(self.x_, feed_dict={self.z: z_batch})
                 
         self.recon_enc(timestamp)
@@ -113,7 +114,7 @@ class clusterGAN(object):
         
     def save(self, timestamp):
 
-        checkpoint_dir = 'checkpoint_dir/{}/{}_{}_z{}_cyc{}_gen{}'.format(self.data, timestamp, self.model, self.z_dim, self.beta_cycle_label, self.beta_cycle_gen)
+        checkpoint_dir = 'checkpoint_dir/{}/{}_z{}_cyc{}_gen{}'.format(self.dataset, timestamp, self.z_dim, self.beta_cycle_label, self.beta_cycle_gen)
 
         if not os.path.exists(checkpoint_dir):
             os.makedirs(checkpoint_dir)
@@ -125,7 +126,7 @@ class clusterGAN(object):
             print('Best Timestamp not provided. Abort !')
             checkpoint_dir = ''
         else:
-            checkpoint_dir = 'checkpoint_dir/{}/{}_{}_z{}_cyc{}_gen{}'.format(self.data, timestamp, self.model, self.z_dim, self.beta_cycle_label, self.beta_cycle_gen)
+            checkpoint_dir = 'checkpoint_dir/{}/{}_z{}_cyc{}_gen{}'.format(self.dataset, timestamp, self.z_dim, self.beta_cycle_label, self.beta_cycle_gen)
 
         self.saver.restore(self.sess, os.path.join(checkpoint_dir, 'model.ckpt'))
         print('Restored model weights.')
@@ -165,10 +166,10 @@ class clusterGAN(object):
         ari = adjusted_rand_score(labels_true, labels_pred)
         nmi = normalized_mutual_info_score(labels_true, labels_pred)
 
-        print('Data = {}, z_dim = {}, beta_label = {}, beta_gen = {} '.format(self.data, self.z_dim, self.beta_cycle_label, self.beta_cycle_gen))
+        print('Data = {}, z_dim = {}, beta_label = {}, beta_gen = {} '.format(self.dataset, self.z_dim, self.beta_cycle_label, self.beta_cycle_gen))
         print(' #Points = {}, K = {}, Purity = {},  NMI = {}, ARI = {},  '.format(latent_rep.shape[0], self.num_classes, purity, nmi, ari))
 
-        with open('logs/Res_{}_{}.txt'.format(self.data, self.model), 'a+') as f:
+        with open('logs/Res_{}.txt'.format(self.dataset), 'a+') as f:
             f.write('{}, {} : K = {}, z_dim = {}, beta_label = {}, beta_gen = {}, Purity = {}, NMI = {}, ARI = {}\n'.format(timestamp, 'Test', self.num_classes, self.z_dim, self.beta_cycle_label, self.beta_cycle_gen, purity, nmi, ari))
             f.flush()
 
