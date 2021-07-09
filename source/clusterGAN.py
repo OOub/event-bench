@@ -114,7 +114,7 @@ class clusterGAN(object):
         
     def save(self, timestamp):
 
-        checkpoint_dir = 'checkpoint_dir/{}/{}_z{}_cyc{}_gen{}'.format(self.dataset, timestamp, self.z_dim, self.beta_cycle_label, self.beta_cycle_gen)
+        checkpoint_dir = 'clusterGAN/checkpoint_dir/{}/{}_z{}_cyc{}_gen{}'.format(self.dataset, timestamp, self.z_dim, self.beta_cycle_label, self.beta_cycle_gen)
 
         if not os.path.exists(checkpoint_dir):
             os.makedirs(checkpoint_dir)
@@ -126,7 +126,7 @@ class clusterGAN(object):
             print('Best Timestamp not provided. Abort !')
             checkpoint_dir = ''
         else:
-            checkpoint_dir = 'checkpoint_dir/{}/{}_z{}_cyc{}_gen{}'.format(self.dataset, timestamp, self.z_dim, self.beta_cycle_label, self.beta_cycle_gen)
+            checkpoint_dir = 'clusterGAN/checkpoint_dir/{}/{}_z{}_cyc{}_gen{}'.format(self.dataset, timestamp, self.z_dim, self.beta_cycle_label, self.beta_cycle_gen)
 
         self.saver.restore(self.sess, os.path.join(checkpoint_dir, 'model.ckpt'))
         print('Restored model weights.')
